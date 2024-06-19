@@ -11,6 +11,10 @@ int handle_input(const char *input) {
     sscanf(input, "%*s %d", &arg);
     exit(arg);
   }
+  if (!strcmp(command, "echo")) {
+    printf("%s\n", input + 5);
+    return 1;
+  }
   return 0;
 }
 
