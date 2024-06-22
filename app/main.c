@@ -63,8 +63,10 @@ int handle_input(char *input) {
     return 1;
   }
   if (!strcmp(command, "cd")) {
-    char path[1024];
-    sscanf(input, "%*s %s", path);
+    char *path = input + 3;
+    if (strcmp(path, "~") == 0) {
+      path = getenv("HOME");
+    }
     if (chdir(path) == 0) {
       return 1;
     } else {
