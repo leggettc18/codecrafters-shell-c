@@ -56,10 +56,17 @@ int handle_input(char *input) {
     printf("%s\n", input + 5);
     return 1;
   }
+  if (!strcmp(command, "pwd")) {
+    char cwd[1024];
+    getcwd(cwd, sizeof(cwd));
+    printf("%s\n", cwd);
+    return 1;
+  }
   if (!strcmp(command, "type")) {
     char arg[20];
     sscanf(input, "%*s %s", arg);
-    if (!strcmp(arg, "exit") || !strcmp(arg, "echo") || !strcmp(arg, "type")) {
+    if (!strcmp(arg, "exit") || !strcmp(arg, "echo") || !strcmp(arg, "type") ||
+        !strcmp(arg, "pwd")) {
       printf("%s is a shell builtin\n", arg);
       return 1;
     } else {
