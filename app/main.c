@@ -2,6 +2,31 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+
+int is_executable(const char *path) { return access(path, X_OK) == 0; }
+
+char *find_in_path(const char *command) {
+  char *path_env = getenv("PATH");
+  if (path_env == NULL) {
+    return NULL;
+  }
+
+  char *path_copy = strdup(path_env);
+  char *dir = strtok(path_copy, ":");
+  static char full_path[1024];
+
+  while (dir != NULL) {
+    snprintf(full_path, sizeof(full_path), "%s/%s", dir, command);
+    if (is_executable(full_path)) {
+      free(path_copy);
+      return full_path;
+    }
+    dir = strtok(NULL, ":");
+  }
+  free(path_copy);
+  return NULL;
+}
 
 int handle_input(const char *input) {
   char command[20];
@@ -22,8 +47,14 @@ int handle_input(const char *input) {
       printf("%s is a shell builtin\n", arg);
       return 1;
     } else {
-      printf("%s: not found\n", arg);
-      return 1;
+      char *path = find_in_path(arg);
+      if (path) {
+        printf("%s is %s\n", arg, path);
+        return 1;
+      } else {
+        printf("%s: not found\n", arg);
+        return 1;
+      }
     }
   }
   return 0;
