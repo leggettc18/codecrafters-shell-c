@@ -62,6 +62,16 @@ int handle_input(char *input) {
     printf("%s\n", cwd);
     return 1;
   }
+  if (!strcmp(command, "cd")) {
+    char path[1024];
+    sscanf(input, "%*s %s", path);
+    if (chdir(path) == 0) {
+      return 1;
+    } else {
+      printf("cd: %s: No such file or directory\n", path);
+      return 1;
+    }
+  }
   if (!strcmp(command, "type")) {
     char arg[20];
     sscanf(input, "%*s %s", arg);
