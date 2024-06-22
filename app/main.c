@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 int is_executable(const char *path) { return access(path, X_OK) == 0; }
@@ -28,7 +30,21 @@ char *find_in_path(const char *command) {
   return NULL;
 }
 
-int handle_input(const char *input) {
+void fork_and_exec_cmd(char *full_path, int argc, char **argv) {
+  pid_t pid = fork();
+  if (pid == 0) {
+    execv(full_path, argv);
+    perror("execv");
+    exit(1);
+  } else if (pid < 0) {
+    perror("fork");
+  } else {
+    int status;
+    waitpid(pid, &status, 0);
+  }
+}
+
+int handle_input(char *input) {
   char command[20];
   sscanf(input, "%s", command);
   if (!strcmp(command, "exit")) {
@@ -56,8 +72,23 @@ int handle_input(const char *input) {
         return 1;
       }
     }
+  } else {
+    char *argv[10];
+    int argc = 0;
+    char *token = strtok(input, " ");
+    while (token != NULL && argc < 10) {
+      argv[argc++] = token;
+      token = strtok(NULL, " ");
+    }
+    argv[argc] = NULL;
+    char *cmd_path = find_in_path(argv[0]);
+    if (cmd_path) {
+      fork_and_exec_cmd(cmd_path, argc, argv);
+      return 1;
+    } else {
+      return 0;
+    }
   }
-  return 0;
 }
 
 int main() {
