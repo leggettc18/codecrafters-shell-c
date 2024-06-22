@@ -15,6 +15,17 @@ int handle_input(const char *input) {
     printf("%s\n", input + 5);
     return 1;
   }
+  if (!strcmp(command, "type")) {
+    char arg[20];
+    sscanf(input, "%*s %s", arg);
+    if (!strcmp(arg, "exit") || !strcmp(arg, "echo") || !strcmp(arg, "type")) {
+      printf("%s is a shell builtin\n", arg);
+      return 1;
+    } else {
+      printf("%s: not found\n", arg);
+      return 1;
+    }
+  }
   return 0;
 }
 
